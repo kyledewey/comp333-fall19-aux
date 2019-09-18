@@ -3,7 +3,7 @@
 Here we introduce _functional programming_, which is a whole programming paradigm (way of thinking about programming).
 Functional programming discourages, or even outright prevents, mutable state.
 That is, reassigning the value of a variable (usually via `=`) is discouraged or disallowed.
-While this can be restrictive, it can make code easier to reason about: a variable will *always* have the same value.
+While this can be restrictive, it can make code easier to reason about: a variable will **always** have the same value.
 
 Functional programming gets its namesake from _higher-order functions_, which is a key language feature.
 All functional languages support higher-order functions, and even most modern non-functional languages support higher-order functions too.
@@ -37,7 +37,7 @@ function runTests() {
 ```
 
 Look closely at the call to `runTest`.
-Notably, the call to `runTest` takes `test_nil_instanceof_list` as a *parameter*; we do *not* call `test_nil_instanceof_list` here.
+Notably, the call to `runTest` takes `test_nil_instanceof_list` as a **parameter**; we do **not** call `test_nil_instanceof_list` here.
 This code takes advantage of higher-order functions, and is treating the `test_nil_instanceof_list` function as a parameter.
 `runTest` itself will call the passed function, specifically with the line `test()`.
 This separation allows us to run the test in a try/catch block within `runTest`, allowing us to avoid putting each individual test in its own try/catch block.
@@ -139,18 +139,18 @@ JavaScript's standard library already has all of these operations built-in.
 These are listed below:
 
 
-- *Looking for certain elements.*
+- **Looking for certain elements.**
   [`Array.prototype.filter`](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Array/filter) takes a higher-order function to select specific elements from an array.
   The passed higher-order function takes an element, returning `true` if it should be selected, else `false`.
   In the prior code snippet, `elementIsSignificant` acts as the passed function, and `filter` will return an array containing all the elements for which `elementIsSignificant` returns `true`.
-- *Processing each element independently.*
+- **Processing each element independently.**
   [`Array.prototype.forEach`](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Array/forEach) takes a higher-order function which is called on each element from an array.
   In the prior code snippet, `doSomething` acts as the passed function.
-- *Creating parallel arrays.*
+- **Creating parallel arrays.**
   [`Array.prototype.map`](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Array/map) takes a higher-order function to transform values in a parameter array to values in a returned array.
   The passed higher-order function takes an element from the parameter array, and returns what the new element should be in the result array.
   In the prior code snippet, `computeSomething` acts as the passed function.
-- *Building a single result using each element.*
+- **Building a single result using each element.**
   [`Array.prototype.reduce`](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Array/Reduce) takes a starting _accumulator_, as well as a function that takes the current accumulator and the current element of the array.
   Given this information, the passed function will compute the new value of the accumulator.
   In the prior code snippet, the initial accumulator is `0`, and `sum` represents the accumulator.
