@@ -84,10 +84,6 @@ func treeToString<A>(_ tree: Tree<A>, toString: (A) -> String) -> String {
     }
 } // treeToString
 
-func intToString(_ i: Int) -> String {
-    return i.description
-}
-
 func intComparator(_ first: Int, _ second: Int) -> ComparisonResult {
     if first == second {
         return ComparisonResult.equalTo
