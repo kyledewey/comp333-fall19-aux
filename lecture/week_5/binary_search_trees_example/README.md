@@ -38,6 +38,7 @@ For the moment, you need to know that Swift:
 
 The rest of this document goes discusses some key programming language features through the lens of Swift.
 Specifically, we look at the code in each of the `.swift` files, and explain what this code does.
+For those looking for more background on Swift, the [Swift Language Guide](https://docs.swift.org/swift-book/LanguageGuide/TheBasics.html) is a great official reference.
 
 ## `binary_search_tree1.swift`: Algebraic Data Types and Pattern Matching ##
 
@@ -202,7 +203,106 @@ This avoids a lot of string concatenation (with `+`), and helps make this concis
 
 ## `binary_search_tree2.swift`: Parametric Polymorphism, Generics, and Higher-Order Functions ##
 
-**TODO**
+### Parametric Polymorphism and Generics ###
+
+The biggest change in `binary_search_tree2.swift` is that we have added _type variables_.
+Right from the top, our definition of trees has changed to:
+
+```swift
+indirect enum Tree<A> {
+    case internalNode(A, Tree<A>, Tree<A>)
+    case leaf
+}
+```
+
+Instead of containing an `Int`, trees now contain an `A`, where `A` is a type variable.
+`A` is put in scope with the line `indirect enum Tree<A>`.
+`Tree` is no longer a valid type, but `Tree<Int>` and `Tree<String>` are now valid types, where `Tree<Int>` refers to a tree containing `Int`s, and `Tree<String>` refers to a tree containing `String`s.
+That is, when refer to `Tree` now, we have to say what type `Tree` itself takes.
+`Tree<A>` is also a valid type in the above code; the type variable `A` itself is a type, so `A` can be used as a type.
+Specifically, the above code says that internal nodes contain an `A`, along with two other `Tree<A>`s.
+
+Via the use of a type variable, we allow for the creation of `Tree`s which hold different types of values.
+Without type variables, we'd be forced to make redundant definitions like:
+
+```swift
+indirect enum IntTree {
+    case internalNode(Int, IntTree, IntTree)
+    case leaf
+}
+
+indirect enum StringTree {
+    case internalNode(String, StringTree, StringTree)
+    case leaf
+}
+```
+
+Moreover, code which works with trees would similarly have to be duplicated for `IntTree` and `StringTree`, despite the fact that the code would be mostly identical.
+This is not ideal.
+
+When type variables are added to data structures (like `enum`s), we refer to them as _generics_.
+`Tree` is a generic data structure.
+
+Type variables can also be added to functions / methods.
+For example, the signature of `contains` introduces a type variable, specifically with:
+
+```swift
+func contains<A>...
+```
+
+This snippet shows that the type variable `A` is in scope within the body of `contains`.
+This usage of `A` is distinct from the usage of `A` when `Tree` was defined; this is analogous to using the same variable name in different scopes.
+When type variables are introduced in the context of a functions / methods, this is referred to as _parametric polymorphism_.
+Usually this is conflated with generics; I'm not particular about the terminology, myself.
+
+
+### Problem with Generics ###
+
+Generics allow our trees to hold values of different types, which gives us a lot more flexibility.
+However, this creates a problem: at definition time, we don't know exactly what type `A` is, so we are restricted to operations which work for any type `A`.
+Very few operations work for any type.
+For example, we can no longer compare values to each other with `==` (as is done in `contains`), nor can we compare values with `<` (as is done in `insert`); we don't know if our `A` actually supports these operations or not.
+Our trees are pretty useless without these operations.
+
+### Solution: Higher-Order Functions ###
+
+A key observation is that we can _mostly_ define our functions without knowing what `A` is.
+The actual type of `A` only matters in a few contexts, namely when we compare (`contains`, `insert`, `treesEqual`) or convert to a string (`treeToString`).
+Rather than try to perform the missing operations in-place, we tweak these functions to take an additional parameter: a higher-order function operation on `A` which performs the missing desired operation.
+In this way, we force the caller to tell us exactly how to work with `A`s.
+Usually, the caller knows what the actual type of `A` is, so this is not a significant burden on the caller.
+
+For example, let's look at the whole signature of `contains`:
+
+```swift
+func contains<A>(tree: Tree<A>,
+                 element: A,
+                 comparator: (A, A) -> ComparisonResult) -> Bool {
+    ...
+}
+```
+
+From this signature, we can gather:
+
+- The name of the function is `contains`
+- Type variable `A` is in scope throughout the rest of `contains`' definition
+- `tree` is a `Tree` _parameterized_ by type variable `A`
+- `element` is a value of type `A`.
+  Considering what `contains` does, `element` is the value to look for in the tree.
+- `comparator` is a function that takes two values of type `A`, and returns a `ComparisonResult` saying how the two elements are related to each other.
+  From the earlier definition of `enum ComparisonResult`, the first `A` could be `equalTo`, `lessThan`, or `greaterThan` the second `A`.
+- Given the above parameters,`contains` returns a boolean value (`Bool`) indicating whether or not `tree` contains `element`.
+
+In the body of `contains`, gather than directly use `==`, `<`, or `>` (as was done in `binary_search_tree1.swift`), we call `comparator` with `element` and `value`, like so: `comparator(element, value)`.
+We then immediately use `switch` to see what the result of the comparison was, and dispatch accordingly based on the result.
+
+The rest of the functions similarly take higher-order functions to work with their generic parameters.
+Specifically:
+
+- `insert` takes `comparator`, which is used in the same manner as `contains`
+- `treesEqual` takes `comparator`, which returns a boolean (`Bool`) indicating whether the two passed `A`s are equal to each other
+- `treeToString` takes `toString`, which returns a string representation of the given `A`
+
 
 ## `binary_search_tree3.swift`: Bounded Type Variables and Protocols ##
 
