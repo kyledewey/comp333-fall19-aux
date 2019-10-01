@@ -37,7 +37,7 @@ func insert(tree: Tree, element: Int) -> Tree {
     case .leaf:
         return Tree.internalNode(element, Tree.leaf, Tree.leaf)
     }
-} // contains
+} // insert
 
 func treesEqual(_ first: Tree, _ second: Tree) -> Bool {
     switch (first, second) {

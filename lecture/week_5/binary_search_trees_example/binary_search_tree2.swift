@@ -55,7 +55,7 @@ func insert<A>(tree: Tree<A>,
     case .leaf:
         return Tree.internalNode(element, Tree.leaf, Tree.leaf)
     }
-} // contains
+} // insert
 
 func treesEqual<A>(_ first: Tree<A>,
                    _ second: Tree<A>,

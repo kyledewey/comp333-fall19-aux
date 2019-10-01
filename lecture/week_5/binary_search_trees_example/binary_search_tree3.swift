@@ -37,7 +37,7 @@ func insert<A: Comparable>(tree: Tree<A>, element: A) -> Tree<A> {
     case .leaf:
         return Tree.internalNode(element, Tree.leaf, Tree.leaf)
     }
-} // contains
+} // insert
 
 func treesEqual<A: Equatable>(_ first: Tree<A>, _ second: Tree<A>) -> Bool {
     switch (first, second) {

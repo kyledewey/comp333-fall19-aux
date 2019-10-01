@@ -38,7 +38,7 @@ extension Tree where A: Comparable {
         case .leaf:
             return Tree.internalNode(element, Tree.leaf, Tree.leaf)
         }
-    } // contains
+    } // insert
 }
 
 extension Tree: Equatable where A: Equatable {
