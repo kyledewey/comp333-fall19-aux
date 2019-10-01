@@ -1,5 +1,5 @@
 indirect enum Tree<A> {
-    case internalNode(A, Tree, Tree)
+    case internalNode(A, Tree<A>, Tree<A>)
     case leaf
 }
 
