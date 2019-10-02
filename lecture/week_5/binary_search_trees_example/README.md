@@ -433,4 +433,70 @@ Additionally, typeclasses are wholly non-equivalent; there are some things that 
 
 ## `binary_search_tree4.swift`: Existing Protocols and Extensions With Type Constraints ##
 
-**TODO**
+### Existing Protocols ###
+
+In `binary_search_tree3.swift`, we defined our own protocols for comparison and string conversion.
+This was done to show exactly how protocols work.
+In this variant, we reuse equivalents in Swift's standard library, namely:
+
+- [`Comparable`](https://developer.apple.com/documentation/swift/comparable), which defines common comparison operations like `<` `<=`, `==`, `>`, and `>=`
+- [`Equatable`](https://developer.apple.com/documentation/swift/equatable?changes=_5), which defines `==`
+- [`CustomStringConvertible`](https://developer.apple.com/documentation/swift/customstringconvertible), which defines having the `.description` property.
+  This gives a string representation of the value it is used on.
+
+### Adding Methods Directly to `Tree<A>` ###
+
+We use `extension` to put our methods directly on `Tree<A>`.
+This changes how we say that `A` needs to extend a given protocol.
+For example, consider the following snippet, from line 6 in `binary_search_tree4.swift`:
+
+```swift
+extension Tree where A: Comparable {
+    ...
+}
+```
+
+This states that we are adding methods to `Tree`.
+From `Tree`'s definition, `A` is already in scope, so we extend `Tree` directly as opposed to `Tree<A>`.
+We then put a bound on `A` with the `where` clause, which states that `A` has to extend the `Comparable` protocol (i.e., `A: Comparable`).
+Important to this discussion is that the methods in this extension are available whenever we know, at compile time, that the type used in the tree (i.e., `A`) extends the `Comparable` protocol.
+This doesn't stop us from making trees where the `A` _doesn't_ implement the protocol, it merely means that these methods won't be available; attemping to call these methods would give us a compile-time error if `A` doesn't implement `Comparable`.
+Looking at the particular methods involved, this makes sense; both `contains` and `insert` need `A` to implement `Comparable` to work, as both depend on `==`, `<`, and `>`.
+
+Now for the next extension:
+
+```swift
+extension Tree: Equatable where A: Equatable {
+    ...
+}
+```
+
+This states that `Tree` implements the `Equatable` protocol, and further requires that `A` extend the `Equatable` protocol.
+As a reminder, `Equatable` defines `==`, so this code is saying we can define `==` on trees as long as we have `==` on values within the tree.
+This code uses a `static func` instead of a typical method; Swift requires that core operations like `==` and `<` be defined as `static`.
+
+The next extension is similar to the one with `Equatable`, namely:
+
+```swift
+extension Tree: CustomStringConvertible where A: CustomStringConvertible {
+    var description: String {
+        switch self {
+        case let .internalNode(value, leftNode, rightNode):
+            return "internalNode(\(value), \(leftNode), \(rightNode)"
+        case .leaf:
+            return "leaf"
+        }
+    }
+} // treeToString
+```
+
+Similar to `Equatable`, this states that a `Tree` extends `CustomStringConvertible` as long as `A` extends `CustomStringConvertible.
+Notably, `description` is not a method, but rather a _computed property_.
+
+### No Extensions on `Int` ###
+
+Unlike with `binary_search_tree3.swift`, we do not define any extensions on `Int`.
+This is because Swift's standard library already provides a number of extensions on `Int` for us, including ones for `Comparable`, `Equatable`, and `CustomStringConvertible`.
+We use these extensions implicitly in the test suite (the `assert` statements at the bottom).
+Notably, the test suite calls these methods directly on the trees involved; the prior extensions put the methods directly on the trees themselves, as opposed to these operations (`contains`, `insert`, etc.) being scattered toplevel functions.
+
