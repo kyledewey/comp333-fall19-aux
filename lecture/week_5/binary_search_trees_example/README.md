@@ -304,10 +304,133 @@ Specifically:
 - `treeToString` takes `toString`, which returns a string representation of the given `A`
 
 
-## `binary_search_tree3.swift`: Bounded Type Variables and Protocols ##
+## `binary_search_tree3.swift`: Protocols, Bounded Type Variables, and Extensions ##
 
-**TODO**
+### Motivation ###
 
-## `binary_search_tree4.swift`: Extensions With Type Constraints ##
+While `binary_search_tree2.swift` is working, looking at the test suite (the `assert` statements near the bottom) reveals that there is a lot of redundancy.
+Whenever when dealing with `Tree<Int>`, we always pass `intComparator` and `intsEqual`, reflecting the fact that there is only one way of comparing integers.
+Redundant code is code we don't want to write.
+
+### Solution: Protocols and Extensions ###
+
+Swift supports _protocols_, which are somewhat analogous to abstract classes or interfaces from an object-oriented realm.
+Like an abstract class, protocols allow us to define abstract methods which will be later defined.
+`binary_search_tree3.swift` defines two protocols, shown below:
+
+```swift
+protocol CanConvertToString {
+    func toString() -> String
+} // CanConvertToString
+
+protocol CanCompare {
+    func compareTo(_ to: Self) -> ComparisonResult
+} // CanCompare
+```
+
+`CanConvertToString` defines the `toString` abstract method, which is intended to return a `String` representation of whatever it is called on.
+`CanCompare` defines the `compareTo` abstract method, which allows for comparison to another value.
+The type `Self` is special, and refers to whatever type `CanCompare` is defined on (more on that in a bit).
+
+Protocols only define abstract methods.
+If we want to implement these methods, we must use _extensions_`.
+For example, consider the following extension, which is defined near the end of `binary_search_tree3.swift`:
+
+```swift
+extension Int: CanCompare {
+    func compareTo(_ other: Int) -> ComparisonResult {
+        if self == other {
+            return ComparisonResult.equalTo
+        } else if self < other {
+            return ComparisonResult.lessThan
+        } else {
+            assert(self > other)
+            return ComparisonResult.greaterThan
+        }
+    } // compareTo
+}
+```
+
+The first line (`extension Int: CanCompare`) states that we are extending `Int` with the `CanCompare` protocol.
+In object-oriented parlance, this is effectively defining `Int` to extend the abstract `CanCompare` class.
+However, unlike with object-oriented classes, we can define extensions on _any_ type, not just ones we define.
+In this case, `Int` is Swift's built-in integer type, which is predefined.
+Nothing stops us from adding our own methods to `Int`, as we do above.
+This extension is done at compile-time.
+
+Notably, `compareTo` is defined to take an `Int` above, as opposed to the `Self` from the protocol.
+This is because we now know the exact type of `Self`: it must be `Int`, as we are defining an extension on `Int`.
+Phrased another way, this `compareTo` method we define is called on values of type `Int`, so `Self` is `Int`.
+Internally, `self` (lowercase) refers to the _value_ we are called on, and `self` is of type `Int` in this context (that is, `self` is of type `Self`).
+The rest of the code is pulled directly from the `intComparator` function in `binary_search_tree_2.swift`.
+
+A similar extension is defined which gives `Int` a `toString` method, namely with:
+
+```swift
+extension Int: CanConvertToString {
+    func toString() -> String {
+        return self.description
+    } // toString
+}
+```
+
+This code accesses the `description` field of `self`, where `self` is of type `Int`.
+`description` is built-in.
+
+Extensions allow us to add methods even if there isn't a corresponding protocol defining abstract methods.
+For example, consider the following code from `binary_search_tree3.swift`:
+
+```swift
+extension CanCompare {
+    func equals(_ other: Self) -> Bool {
+        switch self.compareTo(other) {
+        case .equalTo:
+            return true
+        case _:
+            return false
+        }
+    } // equals
+} // CanCompare
+```
+
+This code adds the `equals` method to _anything_ that extends the `CanCompare` protocol.
+This is possible because `CanCompare` provides the `compareTo` method, which can serve as a way of determining equality.
+Thanks to this extension, `Int` transitively also has the `equals` method.
+
+### Bounded Type Variables ###
+
+Now that we've added our desired comparison and string conversion methods to `Int`, we can take advantage of these.
+However, in order to make use of them, we can no longer work with arbitrary `A` values, but rather `A` values that extend our protocols.
+This is done in the signature of `contains` like so:
+
+```swift
+func contains<A: CanCompare>(tree: Tree<A>, element: A) -> Bool {
+    ...
+}
+```
+
+We no longer just introduce `A`, but now say `A: CanCompare`.
+This introduces type variable `A`, _and_ states that `A` must extend the `CanCompare` protocol.
+If an attempt is made to use `contains` with an `A` that doesn't extend `CanCompare`, it is a compile-time error, and it's considered the fault of the caller of `contains`.
+Within the body of `contains`, since we know that `A: CanCompare`, we can now call any methods present on `CanCompare`, as with `element.compareTo(value)`.
+Similarly, we can call any methods which were added to `CanCompare` itself, as with the call to `value1.equals(value2)` in `treesEqual`.
+We no longer have to pass higher-order functions along saying how to compare our values of type `A`; we've now constrained things so that we operate on specific values of type `A` which have certain methods present.
+This cuts out the repetition of passing around comparison functions.
+
+### Note: Typeclasses vs. Object-Oriented Classes ###
+
+The protocol/extension mechanism in Swift is based on [typeclasses](https://en.wikipedia.org/wiki/Type_class), which are **distinct** from object-oriented classes.
+In typeclass terminology, protocols form typeclasses, and extensions form instances (which are distinct from the word "instance" in object-oriented terminology).
+Typeclasses were first present in Haskell, though the basic idea is becoming increasingly popular (e.g., `trait`/`impl` in Rust, `implicit` values and parameters in Scala, Concepts in C++).
+These mechanisms shar ethe basic idea of adding arbitrary methods to arbitrary types at compile time.
+
+Internally, the way compilation with typeclasses works is similar to how we did things in `binary_search_tree2.swift`.
+Behind the scenes, an extra parameter is passed which holds all the functions available related to the specific protocol required for the specific type (in our case, the methods on `CanCompare` for `Int`).
+This is a different (but related) mechanism than is used for class-based object-oriented programming.
+We won't get into how this compilation works in this class; COMP 430 (Language Design and Compilers) has more details, if you're interested
+For our purposes, it's only necessary to know that this is distinct from class-based inheritance, and allows for different capabilities.
+Additionally, typeclasses are wholly non-equivalent; there are some things that work better with class-based inheritance, and others which work better with typeclasses.
+
+## `binary_search_tree4.swift`: Existing Protocols and Extensions With Type Constraints ##
 
 **TODO**
