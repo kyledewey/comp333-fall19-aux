@@ -3,15 +3,29 @@ indirect enum Tree<A> {
     case leaf
 }
 
-func contains<A: Comparable>(tree: Tree<A>, element: A) -> Bool {
+enum ComparisonResult {
+    case equalTo
+    case lessThan
+    case greaterThan
+}
+
+protocol CanCompare {
+    func compareTo(_ to: Self) -> ComparisonResult
+} // CanCompare
+
+protocol CanConvertToString {
+    func toString() -> String
+} // CanConvertToString
+
+func contains<A: CanCompare>(tree: Tree<A>, element: A) -> Bool {
     switch tree {
     case let .internalNode(value, leftNode, rightNode):
-        if element == value {
+        switch element.compareTo(value) {
+        case .equalTo:
             return true
-        } else if element < value {
+        case .lessThan:
             return contains(tree: leftNode, element: element)
-        } else {
-            assert(element > value)
+        case  .greaterThan:
             return contains(tree: rightNode, element: element)
         }
     case .leaf:
@@ -19,17 +33,17 @@ func contains<A: Comparable>(tree: Tree<A>, element: A) -> Bool {
     }
 } // contains
 
-func insert<A: Comparable>(tree: Tree<A>, element: A) -> Tree<A> {
+func insert<A: CanCompare>(tree: Tree<A>, element: A) -> Tree<A> {
     switch tree {
     case let .internalNode(value, leftNode, rightNode):
-        if element == value {
+        switch element.compareTo(value) {
+        case .equalTo:
             return tree
-        } else if element < value {
+        case .lessThan:
             return Tree.internalNode(value,
                                      insert(tree: leftNode, element: element),
                                      rightNode)
-        } else {
-            assert(element > value)
+        case .greaterThan:
             return Tree.internalNode(value,
                                      leftNode,
                                      insert(tree: rightNode, element: element))
@@ -39,10 +53,10 @@ func insert<A: Comparable>(tree: Tree<A>, element: A) -> Tree<A> {
     }
 } // insert
 
-func treesEqual<A: Equatable>(_ first: Tree<A>, _ second: Tree<A>) -> Bool {
+func treesEqual<A: CanCompare>(_ first: Tree<A>, _ second: Tree<A>) -> Bool {
     switch (first, second) {
     case let (.internalNode(value1, left1, right1), .internalNode(value2, left2, right2)):
-        return value1 == value2 && treesEqual(left1, left2) && treesEqual(right1, right2)
+        return value1.equals(value2) && treesEqual(left1, left2) && treesEqual(right1, right2)
     case (.leaf, .leaf):
         return true
     case _:
@@ -50,14 +64,44 @@ func treesEqual<A: Equatable>(_ first: Tree<A>, _ second: Tree<A>) -> Bool {
     }
 } // treesEqual
 
-func treeToString<A: CustomStringConvertible>(_ tree: Tree<A>) -> String {
+func treeToString<A: CanConvertToString>(_ tree: Tree<A>) -> String {
     switch tree {
     case let .internalNode(value, leftNode, rightNode):
-        return "internalNode(\(value), \(treeToString(leftNode)), \(treeToString(rightNode))"
+        return "internalNode(\(value.toString()), \(treeToString(leftNode)), \(treeToString(rightNode))"
     case .leaf:
         return "leaf"
     }
 } // treeToString
+
+extension Int: CanCompare {
+    func compareTo(_ other: Int) -> ComparisonResult {
+        if self == other {
+            return ComparisonResult.equalTo
+        } else if self < other {
+            return ComparisonResult.lessThan
+        } else {
+            assert(self > other)
+            return ComparisonResult.greaterThan
+        }
+    } // compareTo
+}
+
+extension CanCompare {
+    func equals(_ other: Self) -> Bool {
+        switch self.compareTo(other) {
+        case .equalTo:
+            return true
+        case _:
+            return false
+        }
+    } // equals
+} // CanCompare
+
+extension Int: CanConvertToString {
+    func toString() -> String {
+        return self.description
+    } // toString
+}
 
 // ---BEGIN MAIN---
 assert(contains(tree: Tree.leaf, element: 1) == false)
