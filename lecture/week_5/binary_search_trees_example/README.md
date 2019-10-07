@@ -117,7 +117,7 @@ Going line-by-line, this code does the following:
 - (Line 2) Opens a `switch` on `tree`.
   For the moment, this looks like a `switch` in C/C++/Java.
 - (Line 3) This `case` will apply if the `tree`, in reality, is an `internalNode`.
-  Additionally, the values in the internal node are extracted out into the new varibles `value` (for the integer in the internal node), `leftNode` (for the first `Tree` nested in the internal node), and `rightNode` (for the second `Tree` nested in the internal node).
+  Additionally, the values in the internal node are extracted out into the new variables `value` (for the integer in the internal node), `leftNode` (for the first `Tree` nested in the internal node), and `rightNode` (for the second `Tree` nested in the internal node).
   Swift knows what the definition of `internalNode` is, so there is no need to explicitly state what the types of `value`, `leftNode`, and `rightNode` are; Swift knows these are `Int`, `Tree`, and `Tree`, respectively.
 - (Lines 4-5) If the passed `element` is equal to the `value` in the node, then return `true`: we've found the element is within
 - (Lines 6-7) If the passed `element` is less than the `value` in the node, then recursively search the left child.
