@@ -9,7 +9,7 @@ This library contains:
   If the BST already contains the value, it leaves the BST unchanged.
 - A `treeEqual` operation, which determines if two BSTs have equal **structure**.
   Note that two BSTs with identical values but different structure will **not** be considered equal according to this routine.
-- A `treeToString` operation, which returns a string representation of a gioven BST
+- A `treeToString` operation, which returns a string representation of a given BST
 
 This code defines _immutable_ BSTs.
 With this in mind, `insert` does not modify the existing tree, but rather returns a new tree.
