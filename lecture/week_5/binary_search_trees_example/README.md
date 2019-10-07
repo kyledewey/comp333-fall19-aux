@@ -128,7 +128,7 @@ Going line-by-line, this code does the following:
   This should be true based on our logic, but it's not very explicit without the `assert`.
   Assert, which is not unique to Swift, checks if a condition is true, and typically forces the program to crash if the condition isn't true.
   `assert` is useful for checking assumptions in our code; this code will break if `element > value` isn't true, therefore we prefer a direct crash than some subtly incorrect behavior.
-- (Line 10) Call `contains` recurisvely on the right child.
+- (Line 10) Call `contains` recursively on the right child.
 - (Lines 12-13) If we instead have a leaf node, return `false` directly.
   Since our leaves hold no data and have no children, it's impossible for `element` to be contained within.
 
