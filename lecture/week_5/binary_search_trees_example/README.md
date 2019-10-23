@@ -9,7 +9,7 @@ This library contains:
   If the BST already contains the value, it leaves the BST unchanged.
 - A `treeEqual` operation, which determines if two BSTs have equal **structure**.
   Note that two BSTs with identical values but different structure will **not** be considered equal according to this routine.
-- A `treeToString` operation, which returns a string representation of a gioven BST
+- A `treeToString` operation, which returns a string representation of a given BST
 
 This code defines _immutable_ BSTs.
 With this in mind, `insert` does not modify the existing tree, but rather returns a new tree.
@@ -117,7 +117,7 @@ Going line-by-line, this code does the following:
 - (Line 2) Opens a `switch` on `tree`.
   For the moment, this looks like a `switch` in C/C++/Java.
 - (Line 3) This `case` will apply if the `tree`, in reality, is an `internalNode`.
-  Additionally, the values in the internal node are extracted out into the new varibles `value` (for the integer in the internal node), `leftNode` (for the first `Tree` nested in the internal node), and `rightNode` (for the second `Tree` nested in the internal node).
+  Additionally, the values in the internal node are extracted out into the new variables `value` (for the integer in the internal node), `leftNode` (for the first `Tree` nested in the internal node), and `rightNode` (for the second `Tree` nested in the internal node).
   Swift knows what the definition of `internalNode` is, so there is no need to explicitly state what the types of `value`, `leftNode`, and `rightNode` are; Swift knows these are `Int`, `Tree`, and `Tree`, respectively.
 - (Lines 4-5) If the passed `element` is equal to the `value` in the node, then return `true`: we've found the element is within
 - (Lines 6-7) If the passed `element` is less than the `value` in the node, then recursively search the left child.
@@ -128,7 +128,7 @@ Going line-by-line, this code does the following:
   This should be true based on our logic, but it's not very explicit without the `assert`.
   Assert, which is not unique to Swift, checks if a condition is true, and typically forces the program to crash if the condition isn't true.
   `assert` is useful for checking assumptions in our code; this code will break if `element > value` isn't true, therefore we prefer a direct crash than some subtly incorrect behavior.
-- (Line 10) Call `contains` recurisvely on the right child.
+- (Line 10) Call `contains` recursively on the right child.
 - (Lines 12-13) If we instead have a leaf node, return `false` directly.
   Since our leaves hold no data and have no children, it's impossible for `element` to be contained within.
 
